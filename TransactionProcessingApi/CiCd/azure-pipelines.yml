@@ -12,7 +12,7 @@ parameters:
   - name: azureResourceGroup
     displayName: Target deployment Azure resource group name?
     type: string
-    default: $(azureResourceGroupVar)
+    default: ${{ variables.azureResourceGroupVar }}
 
   - name: workingConnection
     displayName: CI/CD process Azure connection name?
