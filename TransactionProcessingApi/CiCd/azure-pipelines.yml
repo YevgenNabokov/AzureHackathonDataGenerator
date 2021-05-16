@@ -105,8 +105,7 @@ stages:
               resourceGroupName: ${{ parameters.azureResourceGroup }}
               location: ${{ parameters.resourceLocation }}
               templateLocation: 'URL of the file'
-              csmFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)templates/mainTemplate.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
-              csmParametersFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)templates/mainTemplate.parameters.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
+              csmFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)deployment.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
               overrideParameters: '-appName $(functionAppName) -location ${{ parameters.resourceLocation }} -appInsightsLocation ${{ parameters.resourceLocation }}'
               deploymentMode: 'Incremental'
               deploymentName: 'testDeployment01'
