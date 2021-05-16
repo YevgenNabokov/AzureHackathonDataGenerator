@@ -3,36 +3,7 @@ trigger:
 
 pool:
     name: 'Default'
-parameters:
-  - name: azureSubscriptionId
-    displayName: Target deployment Azure subscription ID?
-    type: string
-    default: 'unknown'
 
-  - name: azureResourceGroup
-    displayName: Target deployment Azure resource group name?
-    type: string
-    default: ${{ variables.azureResourceGroupVar }}
-
-  - name: workingConnection
-    displayName: CI/CD process Azure connection name?
-    type: string
-    default: 'unknown'
-
-  - name: workingStorageAccount
-    displayName: CI/CD process storage account name?
-    type: string
-    default: 'unknown'
-
-  - name: workingStorageContainer
-    displayName: CI/CD process storage container name?
-    type: string
-    default: 'unknown'
-
-  - name: resourceLocation
-    displayName: Resource location?
-    type: string
-    default: 'West Europe'
 stages:
 - stage: 'Build'
   displayName: 'Builds the API solution'
@@ -80,24 +51,24 @@ stages:
           - task: AzureFileCopy@4
             inputs:
               SourcePath: 'TransactionProcessingApi/CiCd/deployment.json'
-              azureSubscription: ${{ parameters.workingConnection }}
+              azureSubscription: $(workingConnectionVar)
               Destination: 'AzureBlob'
-              storage: ${{ parameters.workingStorageAccount }}
-              ContainerName: ${{ parameters.workingStorageContainer }}
+              storage: $(workingStorageAccountVar)
+              ContainerName: $(workingStorageContainerVar)
             name: ArmTemplateFileCopy
 
           - task: AzureResourceManagerTemplateDeployment@3
             inputs:
               deploymentScope: 'Resource Group'
-              azureResourceManagerConnection: ${{ parameters.workingConnection }}
-              subscriptionId: ${{ parameters.azureSubscriptionId }}
+              azureResourceManagerConnection: $(workingConnectionVar)
+              subscriptionId: $(azureSubscriptionIdVar)
               action: 'Create Or Update Resource Group'
-              resourceGroupName: ${{ parameters.azureResourceGroup }}
-              location: ${{ parameters.resourceLocation }}
+              resourceGroupName: $(azureResourceGroupVar)
+              location: $(resourceLocationVar)
               templateLocation: 'URL of the file'
               csmFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)deployment.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
               csmParametersFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)deployment.parameters.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
-              overrideParameters: '-appName "$(functionAppName)" -location "${{ parameters.resourceLocation }}" -appInsightsLocation "${{ parameters.resourceLocation }}"'
+              overrideParameters: '-appName "$(functionAppName)" -location "$(resourceLocationVar)" -appInsightsLocation "$(resourceLocationVar)"'
               deploymentMode: 'Incremental'
               deploymentName: 'testDeployment01'
 
@@ -107,6 +78,6 @@ stages:
           - task: AzureFunctionApp@1
             displayName: 'Azure Function Deploy for API'
             inputs:
-                azureSubscription: ${{ parameters.workingConnection }}
+                azureSubscription: $(workingConnectionVar)
                 appName: '$(functionAppName)'
                 package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/TransactionProcessing.Functions.zip'
