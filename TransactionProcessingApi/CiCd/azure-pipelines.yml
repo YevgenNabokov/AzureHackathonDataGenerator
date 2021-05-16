@@ -90,7 +90,7 @@ stages:
           - task: AzureFileCopy@4
             inputs:
               SourcePath: 'TransactionProcessingApi/CiCd/deployment.json'
-              azureSubscription: ${{ parameters.workingAzureSubscription }}
+              azureSubscription: ${{ parameters.workingConnection }}
               Destination: 'AzureBlob'
               storage: ${{ parameters.workingStorageAccount }}
               ContainerName: ${{ parameters.workingStorageContainer }}
