@@ -117,6 +117,6 @@ stages:
           - task: AzureFunctionApp@1
             displayName: 'Azure Function Deploy for API'
             inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}
+                azureSubscription: ${{ parameters.workingConnection }}
                 appName: '$(functionAppName)'
                 package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/TransactionProcessing.Functions.zip'
