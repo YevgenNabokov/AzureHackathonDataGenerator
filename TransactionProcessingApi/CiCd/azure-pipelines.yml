@@ -1,0 +1,122 @@
+trigger:
+- master
+
+pool:
+    vmImage: 'windows-latest'
+parameters:
+  - name: azureSubscription
+    displayName: Target deployment Azure subscription name?
+    type: string
+    default: 'unknown'
+
+  - name: azureSubscriptionId
+    displayName: Target deployment Azure subscription ID?
+    type: string
+    default: 'unknown'
+
+  - name: azureResourceGroup
+    displayName: Target deployment Azure resource group name?
+    type: string
+    default: 'unknown'
+
+  - name: workingAzureSubscription
+    displayName: CI/CD process Azure subscription name?
+    type: string
+    default: 'unknown'
+
+  - name: workingConnection
+    displayName: CI/CD process Azure connection name?
+    type: string
+    default: 'unknown'
+
+  - name: workingStorageAccount
+    displayName: CI/CD process storage account name?
+    type: string
+    default: 'unknown'
+
+  - name: workingStorageContainer
+    displayName: CI/CD process storage container name?
+    type: string
+    default: 'unknown'
+
+  - name: resourceLocation
+    displayName: Resource location?
+    type: string
+    default: 'West Europe'
+stages:
+- stage: 'Build'
+  displayName: 'Builds the API solution'
+  - job: 'Build'
+    displayName: 'Build job'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: 'TransactionProcessingApi/**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build the project - $(buildConfiguration)'
+      inputs:
+        command: 'build'
+        arguments: '--no-restore --configuration $(buildConfiguration)'
+        projects: 'TransactionProcessingApi/**/*.csproj'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish the project - $(buildConfiguration)'
+      inputs:
+        command: 'publish'
+        projects: 'TransactionProcessingApi/**/*.csproj'
+        publishWebProjects: false
+        arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
+        zipAfterPublish: true
+
+    - publish: '$(Build.ArtifactStagingDirectory)'
+      artifact: drop
+    
+- stage: 'Deploy'
+  displayName: 'Deploy the API'
+  dependsOn: Build
+  variables:
+    functionAppName: 'HackathonTransactionProcessorAPI'
+  jobs:
+  - deployment: Deploy
+    environment: test
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureFileCopy@4
+            inputs:
+              SourcePath: 'TransactionProcessingApi/CiCd/deployment.json'
+              azureSubscription: ${{ parameters.workingAzureSubscription }}
+              Destination: 'AzureBlob'
+              storage: ${{ parameters.workingStorageAccount }}
+              ContainerName: ${{ parameters.workingStorageContainer }}
+            name: ArmTemplateFileCopy
+
+          - task: AzureResourceManagerTemplateDeployment@3
+            inputs:
+              deploymentScope: 'Resource Group'
+              azureResourceManagerConnection: ${{ parameters.workingConnection }}
+              subscriptionId: ${{ parameters.azureSubscriptionId }}
+              action: 'Create Or Update Resource Group'
+              resourceGroupName: ${{ parameters.azureResourceGroup }}
+              location: ${{ parameters.resourceLocation }}
+              templateLocation: 'URL of the file'
+              csmFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)templates/mainTemplate.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
+              csmParametersFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)templates/mainTemplate.parameters.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
+              overrideParameters: '-appName $(functionAppName) -location ${{ parameters.resourceLocation }} -appInsightsLocation ${{ parameters.resourceLocation }}'
+              deploymentMode: 'Incremental'
+              deploymentName: 'testDeployment01'
+
+          - download: current
+            artifact: drop
+          
+          - task: AzureFunctionApp@1
+            displayName: 'Azure Function Deploy for API'
+            inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                appName: '$(functionAppName)'
+                package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/TransactionProcessing.Functions.zip'
