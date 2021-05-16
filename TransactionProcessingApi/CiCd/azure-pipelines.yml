@@ -83,7 +83,6 @@ stages:
   jobs:
   - deployment: Deploy
     environment: test
-    - group: Release
     strategy:
       runOnce:
         deploy:
