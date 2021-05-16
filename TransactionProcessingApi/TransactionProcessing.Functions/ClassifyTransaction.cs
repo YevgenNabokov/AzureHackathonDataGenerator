@@ -21,7 +21,7 @@ namespace TransactionProcessing.Functions
             log.LogInformation($"Received request to {nameof(ClassifyTransaction)}.");
 
 
-            return new OkObjectResult(new ClassificationResult() { IsFraud = false });
+            return new OkObjectResult(new ClassificationResult() { IsFraud = transaction.Amount > 100 });
         }
     }
 }
