@@ -4,11 +4,6 @@ trigger:
 pool:
     name: 'Default'
 parameters:
-  - name: azureSubscription
-    displayName: Target deployment Azure subscription name?
-    type: string
-    default: 'unknown'
-
   - name: azureSubscriptionId
     displayName: Target deployment Azure subscription ID?
     type: string
@@ -16,11 +11,6 @@ parameters:
 
   - name: azureResourceGroup
     displayName: Target deployment Azure resource group name?
-    type: string
-    default: 'unknown'
-
-  - name: workingAzureSubscription
-    displayName: CI/CD process Azure subscription name?
     type: string
     default: 'unknown'
 
@@ -102,7 +92,7 @@ stages:
               azureResourceManagerConnection: ${{ parameters.workingConnection }}
               subscriptionId: ${{ parameters.azureSubscriptionId }}
               action: 'Create Or Update Resource Group'
-              resourceGroupName: ${{ parameters.azureResourceGroup }}
+              resourceGroupName: $(azureResourceGroup)
               location: ${{ parameters.resourceLocation }}
               templateLocation: 'URL of the file'
               csmFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)deployment.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
