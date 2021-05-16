@@ -46,9 +46,10 @@ parameters:
 stages:
 - stage: 'Build'
   displayName: 'Builds the API solution'
+  jobs:
   - job: 'Build'
     displayName: 'Build job'
-
+    steps:
     - task: DotNetCoreCLI@2
       displayName: 'Restore project dependencies'
       inputs:
