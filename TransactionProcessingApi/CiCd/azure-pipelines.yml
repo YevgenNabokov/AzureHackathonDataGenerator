@@ -106,7 +106,7 @@ stages:
               location: ${{ parameters.resourceLocation }}
               templateLocation: 'URL of the file'
               csmFileLink: '$(ArmTemplateFileCopy.StorageContainerUri)deployment.json$(ArmTemplateFileCopy.StorageContainerSasToken)'
-              overrideParameters: '-appName $(functionAppName) -location ${{ parameters.resourceLocation }} -appInsightsLocation ${{ parameters.resourceLocation }}'
+              overrideParameters: '-appName "$(functionAppName)" -location "${{ parameters.resourceLocation }}" -appInsightsLocation "${{ parameters.resourceLocation }}"'
               deploymentMode: 'Incremental'
               deploymentName: 'testDeployment01'
 
