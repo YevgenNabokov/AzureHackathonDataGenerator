@@ -14,7 +14,7 @@ namespace TransactionProcessing.Functions
     public static class EnrichTransaction
     {
         [FunctionName("EnrichTransaction")]
-        public static void Run(
+        public static async Task Run(
             [QueueTrigger("incoming-transactions", Connection = "AzureWebJobsStorage")] string queueItem,
             [Queue("enriched-transactions", Connection = "AzureWebJobsStorage")] ICollector<string> outputQueueItem,
             ILogger log)
