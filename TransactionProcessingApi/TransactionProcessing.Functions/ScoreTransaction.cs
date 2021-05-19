@@ -22,88 +22,96 @@ namespace TransactionProcessing.Functions
             [Queue("scored-transactions", Connection = "AzureWebJobsStorage")] ICollector<string> outputQueueItem,
             ILogger log)
         {
-            log.LogInformation($"Received queue item {queueItem}.");
-
-            var transaction = JsonConvert.DeserializeObject<EnrichedTransaction>(queueItem);
-
-            var handler = new HttpClientHandler()
+            try
             {
-                ClientCertificateOptions = ClientCertificateOption.Manual,
-                ServerCertificateCustomValidationCallback =
-                        (httpRequestMessage, cert, cetChain, policyErrors) => { return true; }
-            };
+                log.LogInformation($"Received queue item {queueItem}.");
 
-            var classificationResult = new ClassificationResult()
-            {
-                Transaction = transaction
-            };
+                var transaction = JsonConvert.DeserializeObject<EnrichedTransaction>(queueItem);
 
-            var input = new ScoringInput()
-            {
-                Amount = transaction.Amount,
-                AuthorizationMethod = transaction.AuthorizationMethod,
-                InternetLocation = transaction.InternetLocation,
-                LastHourTransactionCount = transaction.LastHourTransactionCount,
-                LastTenMinutesTransactionCount = transaction.LastTenMinutesTransactionCount,
-                Purpose = transaction.Purpose,
-                Timestamp = transaction.Timestamp,
-                TransactionType = transaction.TransactionType,
-                IsFraud = null
-            };
-
-            using (var client = new HttpClient(handler))
-            {
-                client.BaseAddress = new Uri(GetEnvironmentVar(SCORING_SERVICE_URL));
-                var content = new StringContent(JsonConvert.SerializeObject(new[] { input }));
-
-                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-                HttpResponseMessage response = await client.PostAsync("", content);
-
-                if (response.IsSuccessStatusCode)
+                var handler = new HttpClientHandler()
                 {
-                    string result = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Result: {0}", result);
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback =
+                            (httpRequestMessage, cert, cetChain, policyErrors) => { return true; }
+                };
 
-                    var scoringResult = JsonConvert.DeserializeObject<ScoringOutput>(result);
-                    if (scoringResult.result == null || scoringResult.result.Length < 1)
-                    {
-                        throw new InvalidOperationException("Scoring result was null or contained no items.");
-                    }
-
-                    if (scoringResult.result[0].Length < 3)
-                    {
-                        throw new InvalidOperationException($"Scoring result did not contain expected number of fields, field count: {scoringResult.result[0].Length}");
-                    }
-
-                    bool isFraud;
-                    if (!bool.TryParse((scoringResult.result[0][0] as string)?.ToLower(), out isFraud))
-                    {
-                        throw new InvalidOperationException($"Unable to parse IsFraud indicator, value: {scoringResult.result[0][0]}");
-                    }
-
-                    double rate = Convert.ToDouble(scoringResult.result[0][1]);
-
-                    classificationResult.IsFraud = isFraud;
-                    classificationResult.Rate = rate;
-                }
-                else
+                var classificationResult = new ClassificationResult()
                 {
-                    string responseContent = string.Empty;
+                    Transaction = transaction
+                };
 
-                    try
-                    {
-                        responseContent = await response.Content.ReadAsStringAsync();
-                    }
-                    catch
-                    {
-                    }
+                var input = new ScoringInput()
+                {
+                    Amount = transaction.Amount,
+                    AuthorizationMethod = transaction.AuthorizationMethod,
+                    InternetLocation = transaction.InternetLocation,
+                    LastHourTransactionCount = transaction.LastHourTransactionCount,
+                    LastTenMinutesTransactionCount = transaction.LastTenMinutesTransactionCount,
+                    Purpose = transaction.Purpose,
+                    Timestamp = transaction.Timestamp,
+                    TransactionType = transaction.TransactionType,
+                    IsFraud = null
+                };
 
-                    log.LogError($"Scoring failed with status code: {response.StatusCode}, Headers: {response.Headers}, Content: {responseContent}");
+                using (var client = new HttpClient(handler))
+                {
+                    client.BaseAddress = new Uri(GetEnvironmentVar(SCORING_SERVICE_URL));
+                    var content = new StringContent(JsonConvert.SerializeObject(new[] { input }));
+
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    HttpResponseMessage response = await client.PostAsync("", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string result = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine("Result: {0}", result);
+
+                        var scoringResult = JsonConvert.DeserializeObject<ScoringOutput>(result);
+                        if (scoringResult.result == null || scoringResult.result.Length < 1)
+                        {
+                            throw new InvalidOperationException("Scoring result was null or contained no items.");
+                        }
+
+                        if (scoringResult.result[0].Length < 3)
+                        {
+                            throw new InvalidOperationException($"Scoring result did not contain expected number of fields, field count: {scoringResult.result[0].Length}");
+                        }
+
+                        bool isFraud;
+                        if (!bool.TryParse((scoringResult.result[0][0] as string)?.ToLower(), out isFraud))
+                        {
+                            throw new InvalidOperationException($"Unable to parse IsFraud indicator, value: {scoringResult.result[0][0]}");
+                        }
+
+                        double rate = Convert.ToDouble(scoringResult.result[0][1]);
+
+                        classificationResult.IsFraud = isFraud;
+                        classificationResult.Rate = rate;
+                    }
+                    else
+                    {
+                        string responseContent = string.Empty;
+
+                        try
+                        {
+                            responseContent = await response.Content.ReadAsStringAsync();
+                        }
+                        catch
+                        {
+                        }
+
+                        log.LogError($"Scoring failed with status code: {response.StatusCode}, Headers: {response.Headers}, Content: {responseContent}");
+                    }
                 }
+
+                outputQueueItem.Add(JsonConvert.SerializeObject(classificationResult));
             }
-
-            outputQueueItem.Add(JsonConvert.SerializeObject(classificationResult));
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Error occurred when scoring.");
+                throw;
+            }
         }
 
         private static string GetEnvironmentVar(string name)
