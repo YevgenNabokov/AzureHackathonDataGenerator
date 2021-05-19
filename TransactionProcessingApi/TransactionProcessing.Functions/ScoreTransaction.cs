@@ -54,7 +54,7 @@ namespace TransactionProcessing.Functions
             using (var client = new HttpClient(handler))
             {
                 client.BaseAddress = new Uri(GetEnvironmentVar(SCORING_SERVICE_URL));
-                var content = new StringContent(JsonConvert.SerializeObject(input));
+                var content = new StringContent(JsonConvert.SerializeObject(new[] { input }));
 
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
