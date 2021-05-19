@@ -48,8 +48,8 @@ namespace PopulateTestData
                 var resultTask = container.CreateItemAsync(transaction);
                 resultTask.Wait();
                 c++;
-                Console.Write($"{Math.Round((Convert.ToSingle(c) / transactions.Count), 4) * 100}%          ");
                 Console.SetCursorPosition(0, Console.CursorTop);
+                Console.Write($"{Math.Round((Convert.ToSingle(c) / transactions.Count), 4) * 100}%          ");
             }
 
             Console.WriteLine("Done.");

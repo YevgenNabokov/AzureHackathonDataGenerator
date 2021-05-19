@@ -41,6 +41,42 @@
       "kind": "Storage"
     },
     {
+        "name": "[concat(variables('storageAccountName'), '/default/incomingTransactions')]",
+        "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+        "apiVersion": "2019-06-01",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        ],
+        "properties": {
+            "metadata": {}
+
+        }
+    },
+    {
+        "name": "[concat(variables('storageAccountName'), '/default/enrichedTransactions')]",
+        "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+        "apiVersion": "2019-06-01",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        ],
+        "properties": {
+            "metadata": {}
+
+        }
+    },
+    {
+        "name": "[concat(variables('storageAccountName'), '/default/scoredTransactions')]",
+        "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+        "apiVersion": "2019-06-01",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        ],
+        "properties": {
+            "metadata": {}
+
+        }
+    },
+    {
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2020-06-01",
       "name": "[variables('hostingPlanName')]",
@@ -95,6 +131,10 @@
             {
               "name": "FUNCTIONS_WORKER_RUNTIME",
               "value": "[variables('functionWorkerRuntime')]"
+            },
+            {
+              "name": "SCORING_SERVICE_URL",
+              "value": "http://80cd6299-9e0c-4bf5-bc49-c1507a583ae1.westeurope.azurecontainer.io/score"
             }
           ]
         }

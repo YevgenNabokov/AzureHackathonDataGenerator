@@ -16,12 +16,14 @@ namespace TransactionProcessing.Functions
         [FunctionName("ClassifyTransaction")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] RawTransaction transaction,
+            [Queue("incomingTransactions")] ICollector<string> outputQueueItem,
             ILogger log)
         {
             log.LogInformation($"Received request to {nameof(ClassifyTransaction)}.");
 
+            outputQueueItem.Add(JsonConvert.SerializeObject(transaction));
 
-            return new OkObjectResult(new ClassificationResult() { IsFraud = transaction.Amount > 100 });
+            return new OkResult();
         }
     }
 }

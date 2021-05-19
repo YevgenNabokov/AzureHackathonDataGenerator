@@ -4,9 +4,9 @@ namespace PopulateTestData
 {
     class Program
     {
-        private static readonly string endpointUri = "https://cosmosdb-test-my.documents.azure.com:443/";
+        private static readonly string endpointUri = "https://cosmosdb-transactiondata.documents.azure.com:443/";
 
-        private static string databaseName = "test-database";
+        private static string databaseName = "cosmosdb-test-tp";
 
         static void Main(string[] args)
         {
@@ -15,7 +15,7 @@ namespace PopulateTestData
 
             ////DatesWriter.WriteDates(endpointUri, key, databaseName);
 
-            ////TransactionsWriter1.WriteTransactions(endpointUri, key, databaseName);
+            TransactionsWriter1.WriteTransactions(endpointUri, key, databaseName);
             TransactionEnricher.EnrichTransactions(endpointUri, key, databaseName);
         }
     }

@@ -18,6 +18,8 @@ namespace PopulateTestData
             string sourceContainerName = "test-transactions1",
             string targetContainerName = "test-transactions1processed")
         {
+            Console.WriteLine("Enriching transactions...");
+
             var cosmosClient = new CosmosClient(endpoint, primaryKey);
             var sourceContainer = cosmosClient.GetContainer(databaseName, sourceContainerName);
             var targetContainer = cosmosClient.GetContainer(databaseName, targetContainerName);
@@ -56,6 +58,8 @@ namespace PopulateTestData
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.Write($"{Math.Round((Convert.ToSingle(t) / transactions.Count), 4) * 100}%          ");
             }
+
+            Console.WriteLine("Done.");
         }
 
         private static int UpdateLastNMinutesTransactionCount(TransactionRecord transaction, Dictionary<Guid, Queue<DateTime>> transactionTimes, int minutes)
