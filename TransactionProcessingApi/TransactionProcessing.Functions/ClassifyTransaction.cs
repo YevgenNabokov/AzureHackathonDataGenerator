@@ -16,7 +16,7 @@ namespace TransactionProcessing.Functions
         [FunctionName("ClassifyTransaction")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] RawTransaction transaction,
-            [Queue("incomingTransactions")] ICollector<string> outputQueueItem,
+            [Queue("incoming-transactions")] ICollector<string> outputQueueItem,
             ILogger log)
         {
             log.LogInformation($"Received request to {nameof(ClassifyTransaction)}.");

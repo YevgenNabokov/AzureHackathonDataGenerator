@@ -41,7 +41,7 @@
       "kind": "Storage"
     },
     {
-        "name": "[concat(variables('storageAccountName'), '/default/incomingTransactions')]",
+        "name": "[concat(variables('storageAccountName'), '/default/incoming-transactions')]",
         "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
         "apiVersion": "2019-06-01",
         "dependsOn": [
@@ -53,7 +53,7 @@
         }
     },
     {
-        "name": "[concat(variables('storageAccountName'), '/default/enrichedTransactions')]",
+        "name": "[concat(variables('storageAccountName'), '/default/enriched-transactions')]",
         "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
         "apiVersion": "2019-06-01",
         "dependsOn": [
@@ -65,7 +65,7 @@
         }
     },
     {
-        "name": "[concat(variables('storageAccountName'), '/default/scoredTransactions')]",
+        "name": "[concat(variables('storageAccountName'), '/default/scored-transactions')]",
         "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
         "apiVersion": "2019-06-01",
         "dependsOn": [

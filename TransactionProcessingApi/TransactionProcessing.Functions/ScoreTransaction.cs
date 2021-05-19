@@ -18,8 +18,8 @@ namespace TransactionProcessing.Functions
 
         [FunctionName("ScoreTransaction")]
         public static async Task<IActionResult> Run(
-            [QueueTrigger("enrichedTransactions")] string queueItem,
-            [Queue("scoredTransactions")] ICollector<string> outputQueueItem,
+            [QueueTrigger("enriched-transactions")] string queueItem,
+            [Queue("scored-transactions")] ICollector<string> outputQueueItem,
             ILogger log)
         {
             log.LogInformation($"Received queue item {queueItem}.");

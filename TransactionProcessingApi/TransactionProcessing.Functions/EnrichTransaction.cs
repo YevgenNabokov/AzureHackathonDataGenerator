@@ -15,8 +15,8 @@ namespace TransactionProcessing.Functions
     {
         [FunctionName("EnrichTransaction")]
         public static async Task<IActionResult> Run(
-            [QueueTrigger("incomingTransactions")] string queueItem,
-            [Queue("enrichedTransactions")] ICollector<string> outputQueueItem,
+            [QueueTrigger("incoming-transactions")] string queueItem,
+            [Queue("enriched-transactions")] ICollector<string> outputQueueItem,
             ILogger log)
         {
             log.LogInformation($"Received queue item {queueItem}.");
