@@ -77,16 +77,12 @@ namespace TransactionProcessing.Functions
                     }
 
                     bool isFraud;
-                    if (!bool.TryParse(scoringResult.result[0][0]?.ToLower(), out isFraud))
+                    if (!bool.TryParse((scoringResult.result[0][0] as string)?.ToLower(), out isFraud))
                     {
                         throw new InvalidOperationException($"Unable to parse IsFraud indicator, value: {scoringResult.result[0][0]}");
                     }
 
-                    double rate = 0;
-                    if (!double.TryParse(scoringResult.result[0][1], out rate))
-                    {
-                        throw new InvalidOperationException($"Unable to parse Rate, value: {scoringResult.result[0][1]}");
-                    }
+                    double rate = Convert.ToDouble(scoringResult.result[0][1]);
 
                     classificationResult.IsFraud = isFraud;
                     classificationResult.Rate = rate;

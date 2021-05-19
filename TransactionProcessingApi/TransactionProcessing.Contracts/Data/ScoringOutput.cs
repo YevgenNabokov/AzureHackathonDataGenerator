@@ -6,6 +6,6 @@ namespace TransactionProcessing.Contracts.Data
 {
     public class ScoringOutput
     {
-        public string[][] result { get; set; }
+        public object[][] result { get; set; }
     }
 }
