@@ -108,8 +108,6 @@ namespace TransactionProcessing.Functions
             }
 
             outputQueueItem.Add(JsonConvert.SerializeObject(classificationResult));
-
-            return new OkResult();
         }
 
         private static string GetEnvironmentVar(string name)
