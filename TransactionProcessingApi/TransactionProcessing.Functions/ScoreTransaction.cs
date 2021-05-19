@@ -17,7 +17,7 @@ namespace TransactionProcessing.Functions
         public static string SCORING_SERVICE_URL = nameof(SCORING_SERVICE_URL);
 
         [FunctionName("ScoreTransaction")]
-        public static async void Run(
+        public static void Run(
             [QueueTrigger("enriched-transactions", Connection = "AzureWebJobsStorage")] string queueItem,
             [Queue("scored-transactions", Connection = "AzureWebJobsStorage")] ICollector<string> outputQueueItem,
             ILogger log)
