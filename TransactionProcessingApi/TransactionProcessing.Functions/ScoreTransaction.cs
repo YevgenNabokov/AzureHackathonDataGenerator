@@ -65,9 +65,9 @@ namespace TransactionProcessing.Functions
                     if (response.IsSuccessStatusCode)
                     {
                         string result = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine("Result: {0}", result);
+                        log.LogInformation($"Result: {result}");
 
-                        var scoringResult = JsonConvert.DeserializeObject<ScoringOutput>(result);
+                        var scoringResult = JsonConvert.DeserializeObject<ScoringOutput>(result.Trim('\"').Replace("\\\"", "\""));
                         if (scoringResult.result == null || scoringResult.result.Length < 1)
                         {
                             throw new InvalidOperationException("Scoring result was null or contained no items.");
