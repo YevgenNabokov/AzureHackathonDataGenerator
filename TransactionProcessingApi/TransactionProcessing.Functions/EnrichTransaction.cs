@@ -15,8 +15,8 @@ namespace TransactionProcessing.Functions
     {
         [FunctionName("EnrichTransaction")]
         public static async Task<IActionResult> Run(
-            [QueueTrigger("incoming-transactions")] string queueItem,
-            [Queue("enriched-transactions")] ICollector<string> outputQueueItem,
+            [QueueTrigger("incoming-transactions", Connection = "AzureWebJobsStorage")] string queueItem,
+            [Queue("enriched-transactions", Connection = "AzureWebJobsStorage")] ICollector<string> outputQueueItem,
             ILogger log)
         {
             log.LogInformation($"Received queue item {queueItem}.");

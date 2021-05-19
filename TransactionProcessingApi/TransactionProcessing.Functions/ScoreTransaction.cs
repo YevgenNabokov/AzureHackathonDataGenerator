@@ -18,8 +18,8 @@ namespace TransactionProcessing.Functions
 
         [FunctionName("ScoreTransaction")]
         public static async Task<IActionResult> Run(
-            [QueueTrigger("enriched-transactions")] string queueItem,
-            [Queue("scored-transactions")] ICollector<string> outputQueueItem,
+            [QueueTrigger("enriched-transactions", Connection = "AzureWebJobsStorage")] string queueItem,
+            [Queue("scored-transactions", Connection = "AzureWebJobsStorage")] ICollector<string> outputQueueItem,
             ILogger log)
         {
             log.LogInformation($"Received queue item {queueItem}.");
